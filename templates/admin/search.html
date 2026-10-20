@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title">Search</h1>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-5"><input name="q" class="form-control" placeholder="Name or ID" value="{{ q }}" required></div>
+  <div class="col-sm-3"><select name="type" class="form-select">
+    {% for k in ['students', 'examiners', 'exams', 'bookings'] %}<option value="{{ k }}" {{ 'selected' if k == kind }}>{{ k|capitalize }}</option>{% endfor %}
+  </select></div>
+  <div class="col-auto"><button class="btn btn-primary">Search</button></div>
+</form>
+{% if q %}
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  {% if kind in ('students', 'examiners') %}
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Contact</th></tr></thead>
+    <tbody>{% for u in results %}<tr><td>{{ u.id }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ u.contact or '' }}</td></tr>{% endfor %}</tbody>
+  {% elif kind == 'exams' %}
+    <thead><tr><th>ID</th><th>Examination</th><th>Course</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for e in results %}<tr><td>{{ e.id }}</td><td>{{ e.name }}</td><td>{{ e.course.code }}</td><td>{{ badge(e.status) }}</td>
+      <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.exam_detail', eid=e.id) }}">Open</a></td></tr>{% endfor %}</tbody>
+  {% else %}
+    <thead><tr><th>ID</th><th>Student</th><th>Examination</th><th>Slot</th><th>Status</th></tr></thead>
+    <tbody>{% for b in results %}<tr><td>{{ b.id }}</td><td>{{ b.student.name }}</td><td>{{ b.exam.name }}</td>
+      <td>{{ b.slot.date|datefmt }}, {{ b.slot.start_time|timefmt }}</td><td>{{ badge(b.status) }}</td></tr>{% endfor %}</tbody>
+  {% endif %}
+  {% if not results %}<tbody><tr><td colspan="5" class="text-center text-muted py-4">No {{ kind }} match "{{ q }}".</td></tr></tbody>{% endif %}
+</table></div></div>
+{% endif %}
+{% endblock %}

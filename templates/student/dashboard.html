@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Student dashboard{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge, exam_card %}
+<h1 class="page-title">Hi, {{ current_user.name }}</h1>
+<div class="cards mb-4">
+  {% for label, count in stats %}
+  <div class="stat-card"><div class="num">{{ count }}</div><div class="lbl">{{ label }}</div></div>
+  {% endfor %}
+</div>
+
+<h2 class="h5">Upcoming examinations</h2>
+<div class="card mb-4"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead><tr><th>Examination</th><th>Date</th><th>Time</th><th>Examiner</th><th>Venue</th></tr></thead>
+  <tbody>
+  {% for b in upcoming %}
+    <tr><td>{{ b.exam.name }}</td><td>{{ b.slot.date|datefmt }}</td>
+        <td>{{ b.slot.start_time|timefmt }} - {{ b.slot.end_time|timefmt }}</td>
+        <td>{{ b.slot.examiner.name }}</td><td>{{ b.slot.venue or '' }}</td></tr>
+  {% else %}
+    <tr><td colspan="5" class="text-center text-muted py-4">You have no booked slots yet.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+
+<h2 class="h5">Examinations open for booking</h2>
+<div class="cards mb-4">
+  {% for e in available_exams %}
+    {% call exam_card(e, url_for('student.exam_detail', eid=e.id)) %}
+      <a class="btn btn-sm btn-primary" href="{{ url_for('student.exam_detail', eid=e.id) }}">Choose a slot</a>
+    {% endcall %}
+  {% else %}
+  <div class="text-muted">No examination is open for booking right now.</div>
+  {% endfor %}
+</div>
+
+{% if open_slots %}
+<h2 class="h5">Available slots</h2>
+<div class="card mb-4"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead><tr><th>Examination</th><th>Date</th><th>Time</th><th>Seats left</th><th></th></tr></thead>
+  <tbody>
+  {% for s in open_slots %}
+    <tr><td>{{ s.exam.name }}</td><td>{{ s.date|datefmt }}</td><td>{{ s.start_time|timefmt }} - {{ s.end_time|timefmt }}</td>
+        <td>{{ s.available_seats }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.exam_detail', eid=s.exam_id) }}">View</a></td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endif %}
+
+<h2 class="h5">Published results</h2>
+<div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead><tr><th>Examination</th><th>Marks</th><th></th></tr></thead>
+  <tbody>
+  {% for b in results %}
+    <tr><td>{{ b.exam.name }}</td><td>{{ b.evaluation.total_marks|num }} / {{ b.exam.max_marks|num }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.result_detail', bid=b.id) }}">Feedback</a></td></tr>
+  {% else %}
+    <tr><td colspan="3" class="text-center text-muted py-4">No results have been published yet.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

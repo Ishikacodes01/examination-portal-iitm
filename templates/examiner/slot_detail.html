@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Slot #{{ slot.id }}{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title mb-1">Slot #{{ slot.id }} &middot; {{ slot.exam.name }}</h1>
+<p class="text-muted">{{ slot.date|datefmt }}, {{ slot.start_time|timefmt }} - {{ slot.end_time|timefmt }}
+  {% if slot.venue %}&middot; {{ slot.venue }}{% endif %} &nbsp;{{ badge(slot.status) }}</p>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Student</th><th>Roll no.</th><th>Email</th><th>Booking</th><th>Marks</th><th></th></tr></thead>
+  <tbody>
+  {% for b in bookings %}
+    <tr><td>{{ b.student.name }}</td><td>{{ b.student.roll_no or '' }}</td><td>{{ b.student.email }}</td>
+        <td>{{ badge(b.status) }}</td>
+        <td>{% if b.evaluation %}{{ b.evaluation.total_marks|num }} / {{ slot.exam.max_marks|num }}
+              {% if b.evaluation.published %}<span class="badge text-bg-success">Published</span>{% endif %}{% else %}-{% endif %}</td>
+        <td class="text-end">
+          {% if not (b.evaluation and b.evaluation.published) %}
+          <a class="btn btn-sm btn-primary" href="{{ url_for('examiner.evaluate', bid=b.id) }}">{{ 'Edit marks' if b.evaluation else 'Evaluate' }}</a>
+          {% endif %}</td></tr>
+  {% else %}
+    <tr><td colspan="6" class="text-center text-muted py-4">No students have booked this slot yet.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+<a class="btn btn-link mt-2" href="{{ url_for('examiner.slots') }}">Back to my slots</a>
+{% endblock %}

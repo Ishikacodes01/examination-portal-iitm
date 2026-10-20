@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Slots - {{ exam.name }}{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title mb-1">{{ exam.name }}</h1>
+<p class="text-muted">{{ exam.course.code }} &middot; {{ exam.exam_type }} &middot; {{ exam.duration }} min &nbsp;{{ badge(exam.status) }}</p>
+
+{% if exam.slot_creation_open %}
+<div class="card mb-4"><div class="card-body">
+  <h2 class="h6">Create a slot</h2>
+  <form method="post" class="row g-2 align-items-end">
+    <div class="col-md-3"><label class="form-label small mb-0">Date</label><input type="date" min="{{ today }}" name="date" class="form-control" value="{{ f.get('date', '') }}" required></div>
+    <div class="col-md-2"><label class="form-label small mb-0">Start</label><input type="time" name="start_time" class="form-control" value="{{ f.get('start_time', '') }}" required></div>
+    <div class="col-md-2"><label class="form-label small mb-0">End</label><input type="time" name="end_time" class="form-control" value="{{ f.get('end_time', '') }}" required></div>
+    <div class="col-md-2"><label class="form-label small mb-0">Capacity</label><input type="number" min="1" name="capacity" class="form-control" value="{{ f.get('capacity', '1') }}" required></div>
+    <div class="col-md-3"><label class="form-label small mb-0">Venue / link</label><input name="venue" class="form-control" value="{{ f.get('venue', '') }}"></div>
+    <div class="col-12"><button class="btn btn-primary">Create slot</button></div>
+  </form>
+</div></div>
+{% else %}
+<div class="alert alert-info">Slot creation is closed. It is open only while the status is "Slot Creation" and today is between
+  {{ exam.slot_creation_start|datefmt }} and {{ exam.slot_creation_end|datefmt }}.</div>
+{% endif %}
+
+<h2 class="h6">My slots for this examination</h2>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Date</th><th>Time</th><th>Venue</th><th>Booked</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr><td>{{ s.id }}</td><td>{{ s.date|datefmt }}</td><td>{{ s.start_time|timefmt }} - {{ s.end_time|timefmt }}</td>
+        <td>{{ s.venue or '' }}</td><td>{{ s.capacity - s.available_seats }} / {{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('examiner.slot_detail', sid=s.id) }}">Students</a>
+          {% if not exam.booking_started and s.status != 'Cancelled' %}
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('examiner.slot_edit', sid=s.id) }}">Edit</a>
+          <form method="post" class="d-inline" action="{{ url_for('examiner.slot_delete', sid=s.id) }}"><button class="btn btn-sm btn-outline-danger">Remove</button></form>
+          {% endif %}
+        </td></tr>
+  {% else %}
+    <tr><td colspan="7" class="text-center text-muted py-4">You have not created any slot for this examination.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

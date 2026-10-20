@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="page-title mb-0">Courses</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin.course_form') }}">New course</a>
+</div>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Department</th><th>Status</th><th>Exams</th><th></th></tr></thead>
+  <tbody>
+  {% for c in courses %}
+    <tr><td>{{ c.id }}</td><td>{{ c.code }}</td><td>{{ c.name }}</td><td>{{ c.department or '' }}</td>
+        <td>{{ badge(c.status) }}</td><td>{{ c.exams|length }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.course_form', cid=c.id) }}">Edit</a>
+          <form method="post" class="d-inline" action="{{ url_for('admin.course_delete', cid=c.id) }}">
+            <button class="btn btn-sm btn-outline-danger">Delete</button></form>
+        </td></tr>
+  {% else %}
+    <tr><td colspan="7" class="text-center text-muted py-4">No courses yet. Create the first one.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

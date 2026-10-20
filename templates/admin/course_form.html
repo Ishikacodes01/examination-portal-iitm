@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if course else 'New' }} course{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ 'Edit course' if course else 'New course' }}</h1>
+<div class="card" style="max-width: 640px"><div class="card-body">
+  <form method="post">
+    <div class="row g-3">
+      <div class="col-md-4"><label class="form-label">Course code</label>
+        <input name="code" class="form-control" value="{{ f.get('code', '') }}" required></div>
+      <div class="col-md-8"><label class="form-label">Course name</label>
+        <input name="name" class="form-control" value="{{ f.get('name', '') }}" required></div>
+      <div class="col-md-8"><label class="form-label">Department</label>
+        <input name="department" class="form-control" value="{{ f.get('department') or '' }}"></div>
+      <div class="col-md-4"><label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          {% for s in ['Active', 'Inactive'] %}<option {{ 'selected' if f.get('status') == s }}>{{ s }}</option>{% endfor %}
+        </select></div>
+      <div class="col-12"><label class="form-label">Description</label>
+        <textarea name="description" rows="3" class="form-control">{{ f.get('description') or '' }}</textarea></div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary">Save course</button>
+      <a class="btn btn-link" href="{{ url_for('admin.courses') }}">Cancel</a></div>
+  </form>
+</div></div>
+{% endblock %}

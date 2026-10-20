@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Examiner dashboard{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge, exam_card %}
+<h1 class="page-title">Welcome, {{ current_user.name }}</h1>
+<div class="cards mb-4">
+  {% for label, count in stats %}
+  <div class="stat-card"><div class="num">{{ count }}</div><div class="lbl">{{ label }}</div></div>
+  {% endfor %}
+</div>
+
+<h2 class="h5">Assigned examinations</h2>
+<div class="cards mb-4">
+  {% for e in exams %}
+    {% call exam_card(e, url_for('examiner.exam_slots', eid=e.id)) %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('examiner.exam_slots', eid=e.id) }}">Manage my slots</a>
+    {% endcall %}
+  {% else %}
+  <div class="text-muted">The admin has not assigned any examination to you yet.</div>
+  {% endfor %}
+</div>
+
+<h2 class="h5">Pending evaluations</h2>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Student</th><th>Examination</th><th>Slot</th><th></th></tr></thead>
+  <tbody>
+  {% for b in pending_list %}
+    <tr><td>{{ b.student.name }}</td><td>{{ b.exam.name }}</td>
+        <td>{{ b.slot.date|datefmt }}, {{ b.slot.start_time|timefmt }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-primary" href="{{ url_for('examiner.evaluate', bid=b.id) }}">Evaluate</a></td></tr>
+  {% else %}
+    <tr><td colspan="4" class="text-center text-muted py-4">Nothing to evaluate right now.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

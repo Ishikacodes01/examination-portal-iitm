@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}All slots{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title">All examination slots</h1>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-5"><select name="exam_id" class="form-select">
+    <option value="">All examinations</option>
+    {% for e in exams %}<option value="{{ e.id }}" {{ 'selected' if e.id == exam_id }}>{{ e.name }} ({{ e.course.code }})</option>{% endfor %}
+  </select></div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filter</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Examination</th><th>Date</th><th>Time</th><th>Venue</th><th>Seats left</th><th>Status</th><th>Examiner (change in exceptional cases)</th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr><td>{{ s.id }}</td><td>{{ s.exam.name }}</td><td>{{ s.date|datefmt }}</td>
+        <td>{{ s.start_time|timefmt }} - {{ s.end_time|timefmt }}</td><td>{{ s.venue or '' }}</td>
+        <td>{{ s.available_seats }} / {{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+        <td>
+          <form method="post" class="d-flex gap-1" action="{{ url_for('admin.slot_examiner', sid=s.id) }}">
+            <select name="examiner_id" class="form-select form-select-sm">
+              {% for u in examiners %}<option value="{{ u.id }}" {{ 'selected' if u.id == s.examiner_id }}>{{ u.name }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-sm btn-outline-primary">Change</button>
+          </form></td></tr>
+  {% else %}
+    <tr><td colspan="8" class="text-center text-muted py-4">No slots found.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

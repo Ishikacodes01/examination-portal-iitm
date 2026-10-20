@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Examinations{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge, exam_card %}
+<h1 class="page-title">Examinations</h1>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input name="q" class="form-control" placeholder="Search by exam or course" value="{{ q }}"></div>
+  <div class="col-md-3"><select name="type" class="form-select">
+    <option value="">All types</option>
+    {% for t in EXAM_TYPES %}<option {{ 'selected' if t == etype }}>{{ t }}</option>{% endfor %}
+  </select></div>
+  <div class="col-md-3"><select name="course_id" class="form-select">
+    <option value="">All courses</option>
+    {% for c in courses %}<option value="{{ c.id }}" {{ 'selected' if c.id == course_id }}>{{ c.code }}</option>{% endfor %}
+  </select></div>
+  <div class="col-md-2 d-flex align-items-center gap-2">
+    <div class="form-check mb-0"><input class="form-check-input" type="checkbox" name="open" value="1" id="open" {{ 'checked' if only_open }}>
+      <label class="form-check-label small" for="open">Open now</label></div>
+    <button class="btn btn-outline-primary">Filter</button></div>
+</form>
+<div class="cards">
+  {% for e in exams %}
+    {% call exam_card(e, url_for('student.exam_detail', eid=e.id)) %}
+      {% if e.id in booked_ids %}<span class="badge text-bg-success me-1">You are booked</span>{% endif %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.exam_detail', eid=e.id) }}">{{ 'Choose a slot' if e.booking_open and e.id not in booked_ids else 'View details' }}</a>
+    {% endcall %}
+  {% else %}
+  <div class="text-muted">No examinations match your search.</div>
+  {% endfor %}
+</div>
+{% endblock %}

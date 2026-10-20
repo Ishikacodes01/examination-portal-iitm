@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<h1 class="page-title">Results</h1>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Examination</th><th>Date</th><th>Marks</th><th>Remarks</th><th></th></tr></thead>
+  <tbody>
+  {% for b in bookings %}
+    <tr><td>{{ b.exam.name }}</td><td>{{ b.slot.date|datefmt }}</td>
+        <td>{{ b.evaluation.total_marks|num }} / {{ b.exam.max_marks|num }}</td>
+        <td>{{ (b.evaluation.remarks or '')|truncate(60) }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.result_detail', bid=b.id) }}">Details</a></td></tr>
+  {% else %}
+    <tr><td colspan="5" class="text-center text-muted py-4">No results have been published yet.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Result - {{ booking.exam.name }}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-1">{{ booking.exam.name }}</h1>
+<p class="text-muted">Evaluated by {{ ev.examiner.name }} on {{ ev.evaluated_at|dtfmt }}</p>
+<div class="row g-3" style="max-width: 900px">
+  <div class="col-md-4"><div class="stat-card"><div class="num">{{ ev.total_marks|num }} / {{ booking.exam.max_marks|num }}</div><div class="lbl">Your marks</div></div></div>
+  <div class="col-md-8"><div class="card h-100"><div class="card-body">
+    <h2 class="h6">Examiner's remarks</h2>
+    <p class="mb-0">{{ ev.remarks or 'No remarks were added.' }}</p></div></div></div>
+</div>
+{% if ev.scores %}
+<h2 class="h5 mt-4">Marks by criterion</h2>
+<div class="card" style="max-width: 900px"><div class="table-responsive"><table class="table mb-0">
+  <thead><tr><th>Criterion</th><th>Weightage</th><th>Marks</th></tr></thead>
+  <tbody>{% for s in ev.scores %}<tr><td>{{ s.rubric.criterion }}</td><td>{{ s.rubric.weightage|num }}%</td><td>{{ s.marks|num }} / {{ s.rubric.max_marks|num }}</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endif %}
+<a class="btn btn-link mt-2" href="{{ url_for('student.results') }}">Back to results</a>
+{% endblock %}

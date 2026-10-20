@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Examinations{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="page-title mb-0">Examinations</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin.exam_form') }}">New examination</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-5"><input name="q" class="form-control" placeholder="Search by exam or course" value="{{ q }}"></div>
+  <div class="col-sm-3"><select name="status" class="form-select">
+    <option value="">All statuses</option>
+    {% for s in EXAM_STATUSES %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}
+  </select></div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filter</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Examination</th><th>Course</th><th>Type</th><th>Status</th><th>Booking window</th><th>Slots</th><th>Bookings</th><th></th></tr></thead>
+  <tbody>
+  {% for e in exams %}
+    <tr><td>{{ e.id }}</td><td>{{ e.name }}</td><td>{{ e.course.code }}</td><td>{{ e.exam_type }}</td>
+        <td>{{ badge(e.status) }}</td><td>{{ e.booking_start|datefmt }} to {{ e.booking_end|datefmt }}</td>
+        <td>{{ e.slots|length }}</td><td>{{ e.bookings|length }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.exam_detail', eid=e.id) }}">Manage</a></td></tr>
+  {% else %}
+    <tr><td colspan="9" class="text-center text-muted py-4">No examinations found.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

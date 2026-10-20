@@ -1,0 +1,23 @@
+{% macro badge(text) -%}
+{% set colors = {'Available': 'success', 'Booked': 'success', 'Approved': 'success', 'Active': 'success',
+   'Booking Open': 'success', 'Draft': 'secondary', 'Pending': 'secondary', 'Slot Creation': 'info',
+   'Full': 'warning', 'Closed': 'warning', 'Cancelled': 'danger', 'Deactivated': 'danger',
+   'Inactive': 'danger', 'Completed': 'primary'} -%}
+<span class="badge text-bg-{{ colors.get(text, 'secondary') }}">{{ text }}</span>
+{%- endmacro %}
+
+{# A Google-Classroom-style card for one examination. Use with {% call exam_card(exam, url) %}footer{% endcall %} #}
+{% macro exam_card(exam, href) -%}
+<div class="class-card">
+  <a class="class-card-head c{{ exam.course_id % 6 }}" href="{{ href }}">
+    <div class="ct">{{ exam.name }}</div>
+    <div class="cs">{{ exam.course.code }} &middot; {{ exam.course.name }}</div>
+  </a>
+  <div class="class-card-body">
+    <div class="mb-1">{{ badge(exam.status) }} <span class="small text-muted ms-1">{{ exam.exam_type }}</span></div>
+    <div class="small text-muted">{{ exam.duration }} min &middot; {{ exam.max_marks|num }} marks</div>
+    <div class="small text-muted">Booking: {{ exam.booking_start|datefmt }} to {{ exam.booking_end|datefmt }}</div>
+    {% if caller %}<div class="mt-3">{{ caller() }}</div>{% endif %}
+  </div>
+</div>
+{%- endmacro %}

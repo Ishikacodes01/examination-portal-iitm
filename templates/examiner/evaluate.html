@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Evaluate {{ booking.student.name }}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-1">Evaluate {{ booking.student.name }}</h1>
+<p class="text-muted">{{ exam.name }} &middot; maximum {{ exam.max_marks|num }} marks &middot; slot #{{ booking.slot_id }}, {{ booking.slot.date|datefmt }}</p>
+<div class="card" style="max-width: 760px"><div class="card-body">
+  <form method="post">
+    {% if rubrics %}
+      {% for r in rubrics %}
+      <div class="row g-2 align-items-center border-bottom pb-2 mb-2">
+        <div class="col-md-8"><b>{{ r.criterion }}</b> <span class="text-muted small">(weightage {{ r.weightage|num }}%)</span>
+          {% if r.description %}<div class="small text-muted">{{ r.description }}</div>{% endif %}</div>
+        <div class="col-md-4"><div class="input-group">
+          <input type="number" step="any" min="0" max="{{ r.max_marks|num }}" name="marks_{{ r.id }}" class="form-control"
+                 value="{{ f.get('marks_' ~ r.id, old.get(r.id, '')) }}" required>
+          <span class="input-group-text">/ {{ r.max_marks|num }}</span></div></div>
+      </div>
+      {% endfor %}
+      <p class="small text-muted">The total is worked out for you: each criterion is turned into a fraction, weighted, and scaled to {{ exam.max_marks|num }}.</p>
+    {% else %}
+      <div class="mb-3"><label class="form-label">Total marks (out of {{ exam.max_marks|num }})</label>
+        <input type="number" step="any" min="0" max="{{ exam.max_marks|num }}" name="total" class="form-control" style="max-width: 200px"
+               value="{{ f.get('total', ev.total_marks|num if ev else '') }}" required></div>
+    {% endif %}
+    <div class="mb-3"><label class="form-label">Remarks for the student</label>
+      <textarea name="remarks" rows="3" class="form-control">{{ f.get('remarks', ev.remarks if ev else '') }}</textarea></div>
+    <button class="btn btn-primary">Submit marks</button>
+    <a class="btn btn-link" href="{{ url_for('examiner.slot_detail', sid=booking.slot_id) }}">Cancel</a>
+  </form>
+</div></div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}My slots{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title">My slots</h1>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Examination</th><th>Date</th><th>Time</th><th>Booked</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr><td>{{ s.id }}</td><td>{{ s.exam.name }}</td><td>{{ s.date|datefmt }}</td>
+        <td>{{ s.start_time|timefmt }} - {{ s.end_time|timefmt }}</td>
+        <td>{{ s.capacity - s.available_seats }} / {{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('examiner.slot_detail', sid=s.id) }}">View students</a></td></tr>
+  {% else %}
+    <tr><td colspan="7" class="text-center text-muted py-4">You have no slots yet. Open "My examinations" to create one.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

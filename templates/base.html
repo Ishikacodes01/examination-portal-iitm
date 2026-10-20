@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Home{% endblock %} - Examera</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% set ep = request.endpoint or '' %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}"><span class="logo">E</span> Examera</a>
+  {% if current_user.is_authenticated %}
+  <div class="d-flex align-items-center gap-3">
+    <span class="small text-white d-none d-sm-inline">{{ current_user.name }} &middot; {{ current_user.role|capitalize }}</span>
+    <a class="btn btn-sm btn-outline-light" href="{{ url_for('auth.logout') }}">Sign out</a>
+  </div>
+  {% endif %}
+</header>
+
+{% if current_user.is_authenticated %}
+<div class="shell">
+  <nav class="sidebar">
+    {% if current_user.role == 'admin' %}
+      <a class="nav-item {{ 'active' if ep == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+      <a class="nav-item {{ 'active' if ep.startswith('admin.course') }}" href="{{ url_for('admin.courses') }}">Courses</a>
+      <a class="nav-item {{ 'active' if ep == 'admin.exams' or ep.startswith('admin.exam_') or ep.startswith('admin.rubric') }}" href="{{ url_for('admin.exams') }}">Examinations</a>
+      <a class="nav-item {{ 'active' if ep.startswith('admin.examiner') }}" href="{{ url_for('admin.examiners') }}">Examiners</a>
+      <a class="nav-item {{ 'active' if ep == 'admin.students' }}" href="{{ url_for('admin.students') }}">Students</a>
+      <a class="nav-item {{ 'active' if ep.startswith('admin.slot') }}" href="{{ url_for('admin.slots') }}">Slots</a>
+      <a class="nav-item {{ 'active' if ep.startswith('admin.booking') }}" href="{{ url_for('admin.bookings') }}">Bookings</a>
+      <a class="nav-item {{ 'active' if ep == 'admin.search' }}" href="{{ url_for('admin.search') }}">Search</a>
+    {% elif current_user.role == 'examiner' %}
+      {% if current_user.is_approved %}
+        <a class="nav-item {{ 'active' if ep == 'examiner.dashboard' }}" href="{{ url_for('examiner.dashboard') }}">Dashboard</a>
+        <a class="nav-item {{ 'active' if ep in ('examiner.exams', 'examiner.exam_slots') }}" href="{{ url_for('examiner.exams') }}">My examinations</a>
+        <a class="nav-item {{ 'active' if ep in ('examiner.slots', 'examiner.slot_detail', 'examiner.slot_edit', 'examiner.evaluate') }}" href="{{ url_for('examiner.slots') }}">My slots</a>
+      {% else %}
+        <a class="nav-item {{ 'active' if ep == 'examiner.pending' }}" href="{{ url_for('examiner.pending') }}">Account status</a>
+      {% endif %}
+    {% else %}
+      <a class="nav-item {{ 'active' if ep == 'student.dashboard' }}" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+      <a class="nav-item {{ 'active' if ep in ('student.exams', 'student.exam_detail') }}" href="{{ url_for('student.exams') }}">Examinations</a>
+      <a class="nav-item {{ 'active' if ep == 'student.bookings' }}" href="{{ url_for('student.bookings') }}">My bookings</a>
+      <a class="nav-item {{ 'active' if ep in ('student.results', 'student.result_detail') }}" href="{{ url_for('student.results') }}">Results</a>
+    {% endif %}
+    {% if current_user.role != 'admin' %}
+      <a class="nav-item {{ 'active' if ep == 'auth.profile' }}" href="{{ url_for('auth.profile') }}">Edit profile</a>
+    {% endif %}
+  </nav>
+  <main class="content">
+{% else %}
+  <main class="auth-wrap">
+{% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category if category in ('success', 'danger', 'warning', 'info') else 'info' }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+{% if current_user.is_authenticated %}
+</div>
+{% endif %}
+</body>
+</html>

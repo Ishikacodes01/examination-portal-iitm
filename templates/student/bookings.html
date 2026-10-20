@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}My bookings{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<h1 class="page-title">My bookings</h1>
+<p class="text-muted">Your schedule and your full booking history, including cancelled bookings.</p>
+{% for b in bookings %}
+<div class="card mb-3"><div class="card-body">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+    <div>
+      <div class="h6 mb-1">{{ b.exam.name }} <span class="ms-1">{{ badge(b.status) }}</span></div>
+      <div class="text-muted small">{{ b.slot.date|datefmt }}, {{ b.slot.start_time|timefmt }} - {{ b.slot.end_time|timefmt }}
+        &middot; {{ b.slot.examiner.name }}{% if b.slot.venue %} &middot; {{ b.slot.venue }}{% endif %}</div>
+      <div class="text-muted small">Booking #{{ b.id }}, made on {{ b.booking_date|dtfmt }}</div>
+    </div>
+    <div>
+      {% if b.status == 'Booked' %}
+        {% if today <= b.exam.booking_end %}
+        <form method="post" action="{{ url_for('student.cancel', bid=b.id) }}"><button class="btn btn-sm btn-outline-danger">Cancel booking</button></form>
+        <div class="small text-muted mt-1">Until {{ b.exam.booking_end|datefmt }}</div>
+        {% else %}<span class="small text-muted">Deadline passed</span>{% endif %}
+      {% elif b.evaluation and b.evaluation.published %}
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.result_detail', bid=b.id) }}">View result</a>
+      {% endif %}
+    </div>
+  </div>
+  <details class="mt-2"><summary class="small text-muted">History</summary>
+    <ul class="small mb-0 mt-1">
+      {% for log in b.logs %}<li>{{ log.created_at|dtfmt }} &middot; <b>{{ log.action }}</b>{% if log.note %} &middot; {{ log.note }}{% endif %}</li>{% endfor %}
+    </ul></details>
+</div></div>
+{% else %}
+<div class="text-muted">You have not booked anything yet. Open "Examinations" to find a slot.</div>
+{% endfor %}
+{% endblock %}

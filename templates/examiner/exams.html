@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}My examinations{% endblock %}
+{% block content %}
+{% from 'macros.html' import exam_card %}
+<h1 class="page-title">My examinations</h1>
+<div class="cards">
+  {% for e in exams %}
+    {% call exam_card(e, url_for('examiner.exam_slots', eid=e.id)) %}
+      <div class="small mb-2">
+        Slot creation: <b>{{ 'open' if e.slot_creation_open else 'closed' }}</b>
+        ({{ e.slot_creation_start|datefmt }} to {{ e.slot_creation_end|datefmt }})<br>
+        My slots: {{ counts[e.id] }}</div>
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('examiner.exam_slots', eid=e.id) }}">Manage my slots</a>
+    {% endcall %}
+  {% else %}
+  <div class="text-muted">The admin has not assigned any examination to you yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}

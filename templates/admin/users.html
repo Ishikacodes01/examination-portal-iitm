@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ kind|capitalize }}{% endblock %}
+{% block content %}
+{% from 'macros.html' import badge %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="page-title mb-0">{{ kind|capitalize }}</h1>
+  {% if kind == 'examiners' %}
+  <form class="d-flex gap-2" method="get">
+    <select name="status" class="form-select">
+      <option value="">All statuses</option>
+      {% for s in ['Pending', 'Approved', 'Deactivated'] %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-outline-primary">Filter</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if kind == 'examiners' %}
+<details class="card p-3 mb-3"><summary class="fw-medium">Add an examiner</summary>
+  <form method="post" action="{{ url_for('admin.examiner_add') }}" class="row g-2 mt-1">
+    <div class="col-md-4"><input name="name" class="form-control" placeholder="Full name" required></div>
+    <div class="col-md-4"><input type="email" name="email" class="form-control" placeholder="Email" required></div>
+    <div class="col-md-4"><input name="department" class="form-control" placeholder="Department" required></div>
+    <div class="col-md-4"><input name="contact" class="form-control" placeholder="Contact number"></div>
+    <div class="col-md-4"><input type="password" name="password" class="form-control" placeholder="Password (6+ characters)" minlength="6" required></div>
+    <div class="col-md-4"><button class="btn btn-primary">Add and approve</button></div>
+  </form>
+</details>
+{% endif %}
+
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Contact</th>
+    {% if kind == 'examiners' %}<th>Department</th><th>Status</th><th>Exams</th><th>Slots</th><th></th>
+    {% else %}<th>Roll no.</th><th>Bookings</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr><td>{{ u.id }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ u.contact or '' }}</td>
+    {% if kind == 'examiners' %}
+      {% set st = u.examiner_profile.status %}
+      <td>{{ u.examiner_profile.department }}</td><td>{{ badge(st) }}</td>
+      <td>{{ u.assigned_exams|length }}</td><td>{{ u.slots|length }}</td>
+      <td class="text-end">
+        {% if st != 'Approved' %}
+          <form method="post" class="d-inline" action="{{ url_for('admin.examiner_action', uid=u.id, action='approve' if st == 'Pending' else 'reactivate') }}"><button class="btn btn-sm btn-success">{{ 'Approve' if st == 'Pending' else 'Reactivate' }}</button></form>
+        {% endif %}
+        {% if st != 'Deactivated' %}
+          <form method="post" class="d-inline" action="{{ url_for('admin.examiner_action', uid=u.id, action='deactivate') }}"><button class="btn btn-sm btn-outline-danger">{{ 'Reject' if st == 'Pending' else 'Deactivate' }}</button></form>
+        {% endif %}
+      </td>
+    {% else %}
+      <td>{{ u.roll_no or '' }}</td><td>{{ u.bookings|length }}</td>
+    {% endif %}
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="text-center text-muted py-4">Nothing here yet.</td></tr>
+  {% endfor %}
+  </tbody></table></div></div>
+{% endblock %}
