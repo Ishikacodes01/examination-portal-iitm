@@ -1,5 +1,5 @@
 """Small helpers shared by all the route files."""
-from datetime import datetime
+from datetime import date, datetime
 from functools import wraps
 
 from flask import abort, redirect, url_for
@@ -63,7 +63,8 @@ def refresh_slot(slot):
     if slot.status == 'Cancelled':
         return
     active = Booking.query.filter(Booking.slot_id == slot.id, Booking.status.in_(ACTIVE)).all()
-    if active and all(b.status == 'Completed' for b in active):
+    all_done = bool(active) and all(b.status == 'Completed' for b in active)
+    if all_done and (slot.available_seats == 0 or slot.date <= date.today()):
         slot.status = 'Completed'
     elif slot.available_seats == 0:
         slot.status = 'Full'          # capacity reached -> slot closes automatically
